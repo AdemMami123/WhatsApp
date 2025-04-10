@@ -1,33 +1,24 @@
 import React, { useState } from "react";
 import {
-  Button,
+  View,
+  Text,
+  FlatList,
   Image,
   ImageBackground,
-  Platform,
   StyleSheet,
-  Text,
-  TextInput,
-  TouchableHighlight,
+  TouchableOpacity,
+  Linking,
 } from "react-native";
-import firebase from "../../Config";
-import { FlatList, View } from "react-native";
-//const database = firebase.database();
-//const ref_database = database.ref();
-//const ref_listcomptes = ref_database.child("ListComptes");
+import { MaterialIcons } from '@expo/vector-icons';
+
 const data = [
-  {
-    pseudo: "adem",
-    numero: "123456",
-  },
-  {
-    pseudo: "mohamed",
-    numero: "123456",
-  },
+  { pseudo: "Adem", numero: "123456", isOnline: true },
+  { pseudo: "Mohamed", numero: "123456", isOnline: false },
+  { pseudo: "Ali", numero: "123456", isOnline: true },
+ 
 ];
 
-export default function ListUsers() {
-  const [pseudo, setPseudo] = useState("");
-  const [numero, setNumero] = useState();
+export default function ListUsers({ navigation }) {
   return (
     <ImageBackground
       source={require("../../assets/walpaper.jpg")}
@@ -35,57 +26,110 @@ export default function ListUsers() {
     >
       <FlatList
         data={data}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={styles.listContainer}
         renderItem={({ item }) => (
-          <View
-
-            style={{
-              flexDirection: "row",
-              borderColor: "white",
-              borderWidth: 2,
-              margin: 5,
-              padding: 5,
-              borderRadius: 5,
-            }}
-          >
-            <TouchableHighlight onPress={() => {props.navigation.navigate("Chat")}}>
-            <Image
-              source={require("../../assets/profile.jpg")}
-              style={{ width: 40, height: 50 }}
-            ></Image>
-            </TouchableHighlight>
-            <Text>{item.pseudo}</Text>
-            <Text onPress={()=>{
-              if(Platform.OS=="android")
-              {
-                Linking.openURL(`tel:${item.numero}`)
-              }
-              else
-              {
-                Linking.openURL(`telprompt:${item.numero}`)
-              }
-            }}>{item.numero}</Text>
+          <View style={styles.card}>
+            <View style={styles.avatarContainer}>
+              <TouchableOpacity onPress={() => navigation.navigate("Chat", { user: item })}>  
+                <Image source={require("../../assets/profile.jpg")} style={styles.avatar} />
+              </TouchableOpacity>
+              <View style={[styles.statusIndicator, { backgroundColor: item.isOnline ? '#4CAF50' : '#9E9E9E' }]} />
+            </View>
+            
+            <View style={styles.textContainer}>
+              <Text style={styles.pseudo}>{item.pseudo}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  if (Platform.OS === "android") {
+                    Linking.openURL(`tel:${item.numero}`);
+                  } else {
+                    Linking.openURL(`telprompt:${item.numero}`);
+                  }
+                }}
+              >
+                <Text style={styles.numero}>{item.numero}</Text>
+              </TouchableOpacity>
+              <Text style={styles.statusText}>
+                {item.isOnline ? 'Online' : 'Offline'}
+              </Text>
+            </View>
+            
+            <TouchableOpacity 
+              style={styles.messageButton}
+              onPress={() => navigation.navigate("Chat", { user: item })}
+            >
+              <MaterialIcons name="chevron-right" size={30} color="#6974d6" />
+            </TouchableOpacity>
           </View>
         )}
-      ></FlatList>
+      />
     </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
-  input: {
-    color: "white",
-    borderWidth: 2,
-    borderColor: "white",
-    height: 50,
-    width: "90%",
-    backgroundColor: "#0007",
-    marginBottom: 15,
-    borderRadius: 4,
-    textAlign: "center",
-  },
   container: {
     flex: 1,
-    backgroundColor: "white",
-    alignItems: "center", // align horiz
-    justifyContent: "center", // align verti
+    padding: 10,
+    backgroundColor: "#f5f5f5",
+  },
+  listContainer: {
+    marginTop: 50,
+  },
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 15,
+    marginVertical: 8,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    alignItems: "center",
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginRight: 15,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  statusIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  textContainer: {
+    flex: 1,
+  },
+  pseudo: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  numero: {
+    fontSize: 16,
+    color: "#007bff",
+    marginTop: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    color: '#616161',
+    marginTop: 2,
+  },
+  messageButton: {
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

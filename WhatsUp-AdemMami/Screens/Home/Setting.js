@@ -1,88 +1,82 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Image,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TextInput,
-} from "react-native";
+import { View, StyleSheet, Image, KeyboardAvoidingView } from "react-native";
+import { Text, TextInput, Button } from "react-native-paper";
 import firebase from "../../Config";
+
 const database = firebase.database();
 const ref_database = database.ref();
-const ref_listcomptes=ref_database.child("ListComptes");
+const ref_listcomptes = ref_database.child("ListComptes");
 
 export default function Setting() {
   const [pseudo, setPseudo] = useState("");
-  const [numero, setNumero] = useState();
+  const [numero, setNumero] = useState("");
+
+  const handleSave = () => {
+    const key = ref_listcomptes.push().key;
+    const ref_uncompte = ref_listcomptes.child("compte" + key);
+    ref_uncompte.set({ pseudo, numero });
+  };
+
   return (
-    <ImageBackground
-      source={require("../../assets/settings.png")}
-      style={styles.container}
-    >
-      <Text
-        style={{
-          fontSize: 32,
-          color: "#11A",
-          fontWeight: "bold",
-        }}
-      >
+    <KeyboardAvoidingView behavior="padding" style={styles.container}>
+      <Text variant="headlineMedium" style={styles.title}>
         Settings
       </Text>
-      <Image
-        source={require("../../assets/profile.jpg")}
-        style={{
-          width: 250,
-          height: 250,
-          backgroundColor: "#0052",
-          borderRadius: 40,
-          marginBottom: 50,
-        }}
-      ></Image>
+      <Image source={require("../../assets/profile.jpg")} style={styles.profileImage} />
       <TextInput
-        onChangeText={(ch) => {
-          setPseudo(ch);
-        }}
+        label="Pseudo"
+        mode="outlined"
+        value={pseudo}
+        onChangeText={setPseudo}
         style={styles.input}
-        placeholderTextColor={"white"}
-        placeholder="le pseudo"
-      ></TextInput>
+      />
       <TextInput
-        onChangeText={(ch) => {
-          setNumero(ch);
-        }}
+        label="Numéro"
+        mode="outlined"
+        keyboardType="phone-pad"
+        value={numero}
+        onChangeText={setNumero}
         style={styles.input}
-        placeholderTextColor={"white"}
-        placeholder="le numero"
-      ></TextInput>
-      <Button onPress={()=>{
-        const key=ref_listcomptes.push().key;
-        const ref_uncompte=ref_listcomptes.child("compte"+key);
-        ref_uncompte.set({
-          pseudo,
-          numero
-        })
-      }} title="save"></Button>
-      <Button title="Deconnect"></Button>
-    </ImageBackground>
+      />
+      <Button mode="contained" onPress={handleSave} style={styles.button}>
+        Save
+      </Button>
+      <Button mode="outlined" onPress={() => {}} style={styles.logoutButton}>
+        Déconnecter
+      </Button>
+    </KeyboardAvoidingView>
   );
 }
+
 const styles = StyleSheet.create({
-  input: {
-    color: "white",
-    borderWidth: 2,
-    borderColor: "white",
-    height: 50,
-    width: "90%",
-    backgroundColor: "#0007",
-    marginBottom: 15,
-    borderRadius: 4,
-    textAlign: "center",
-  },
   container: {
     flex: 1,
-    backgroundColor: "white",
-    alignItems: "center", // align horiz
-    justifyContent: "center", // align verti
+    backgroundColor: "#F7F9FC",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  title: {
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#333",
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 30,
+  },
+  input: {
+    width: "100%",
+    marginBottom: 15,
+  },
+  button: {
+    width: "70%",
+    marginTop: 10,
+  },
+  logoutButton: {
+    width: "70%",
+    marginTop: 10,
   },
 });
